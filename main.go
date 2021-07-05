@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -25,9 +26,11 @@ func main() {
 	// Clear screen
 	s.Clear()
 
-	s.SetContent(0, 0, 'H', nil, textStyle)
-	s.SetContent(1, 0, 'i', nil, textStyle)
-	s.SetContent(2, 0, '!', nil, textStyle)
+	w, h := s.Size()
+	mainMenu := newGameScreen("Main Menu", s, w, h, textStyle)
+	currentMenu := mainMenu
+
+	text := ""
 
 	//Quit function
 	quit := func() {
@@ -36,6 +39,12 @@ func main() {
 	}
 	for {
 		// Update screen
+		s.Clear()
+
+		currentMenu.DrawContent()
+
+		drawText(s, 1, 1, 20, 2, textStyle, text)
+
 		s.Show()
 
 		// Poll event
@@ -44,10 +53,18 @@ func main() {
 		// Process event
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
+			w, h = s.Size()
+			currentMenu.UpdateSize(w, h)
 			s.Sync()
 		case *tcell.EventKey:
+			key, ch := ev.Key(), ev.Rune()
+			text = fmt.Sprint("Key: ", key, " Rune: ", ch)
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				quit()
+			} else if ev.Rune() == 119 { //w
+				text = "W"
+			} else if ev.Rune() == 115 { //s
+				text = "S"
 			}
 		}
 	}

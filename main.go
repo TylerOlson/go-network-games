@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -23,14 +22,57 @@ func main() {
 	textStyle := tcell.StyleDefault.Background(tcell.ColorGray).Foreground(tcell.ColorWhite)
 	s.SetStyle(defStyle)
 
-	// Clear screen
-	s.Clear()
-
 	w, h := s.Size()
-	mainMenu := newGameScreen("Main Menu", s, w, h, textStyle)
-	currentMenu := mainMenu
 
-	text := ""
+	// Create a TerminalScreen for all of our other screens to look at
+	ts := NewTerminalScreen(s, w, h, textStyle)          // typeof *TerminalScreen
+	mms := NewMainMenuScreen(ts, "Option 1", "Option 2") // typeof *MainMenuScreen
+	gs := NewGameScreen(ts)                              // typeof *GameScreen
+
+	/*
+		MainMenuScreen {
+			title            string
+			currentSelection int
+			options          []string
+			*TerminalScreen {
+				s             tcell.Screen
+				width, height int
+				textStyle     tcell.Style
+			}
+		}
+
+	*/
+
+	// We create an empty currentScreen variable with type TerminalScreenInterface
+	var currentScreen TerminalScreenInterface
+	/*
+		TerminalScreenInterface {
+			DrawContent()
+			OnKeyEvent(key tcell.Key, ch rune)
+			UpdateSize(width, height int)
+		}
+	*/
+
+	// Since type TerminalScreenInterface requires 3 functions, we can set currentScreen to mms,
+	// as mms fulfills the requirement of those 3 functions. It doesn't matter where they are defined
+	// as they are declared by the interface
+	currentScreen = mms
+	// so it's worth noting that here, currentScreen IS NOT of type MainMenuScreen. It is still of type
+	// TerminalScreenInterface. Therefore it can ONLY do currentScreen.DrawContent()... and the other two funcs
+
+	// the main confusing part about the interfaces is that they are implemented implicitly
+	// so nothing really explicitly says that mms can be a TerminalScreenInterface, you just gotta know
+
+	//_ = mms.title ✅
+	//_ = currentScreen.title ❌
+
+	/*
+		type MainMenuScreen struct {
+		title            string
+		currentSelection int
+		options          []string
+		*TerminalScreen
+	}*/
 
 	//Quit function
 	quit := func() {
@@ -41,9 +83,8 @@ func main() {
 		// Update screen
 		s.Clear()
 
-		currentMenu.DrawContent()
-
-		drawText(s, 1, 1, 20, 2, textStyle, text)
+		// Draw our currentScreen
+		currentScreen.DrawContent()
 
 		s.Show()
 
@@ -54,18 +95,21 @@ func main() {
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			w, h = s.Size()
-			currentMenu.UpdateSize(w, h)
+			ts.UpdateSize(w, h)
 			s.Sync()
 		case *tcell.EventKey:
 			key, ch := ev.Key(), ev.Rune()
-			text = fmt.Sprint("Key: ", key, " Rune: ", ch)
+			currentScreen.OnKeyEvent(key, ch)
+
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				quit()
-			} else if ev.Rune() == 119 { //w
-				text = "W"
-			} else if ev.Rune() == 115 { //s
-				text = "S"
+			}
+			if ch == 119 { //w
+				currentScreen = mms
+			} else if ch == 115 { //s
+				currentScreen = gs
 			}
 		}
 	}
+
 }

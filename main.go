@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -17,74 +18,36 @@ func main() {
 		log.Fatalf("%+v", err)
 	}
 
-	// Set text styles
+	// Set text stylesÍ
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-	textStyle := tcell.StyleDefault.Background(tcell.ColorGray).Foreground(tcell.ColorWhite)
 	s.SetStyle(defStyle)
+	s.Clear()
 
 	w, h := s.Size()
 
+	screenManager := NewScreenManager()
+
 	// Create a TerminalScreen for all of our other screens to look at
-	ts := NewTerminalScreen(s, w, h, textStyle)          // typeof *TerminalScreen
-	mms := NewMainMenuScreen(ts, "Option 1", "Option 2") // typeof *MainMenuScreen
-	gs := NewGameScreen(ts)                              // typeof *GameScreen
+	ts := NewTerminalScreen(s, w, h, defStyle)                        // typeof *TerminalScreen
+	mms := NewMainMenuScreen(ts, screenManager, "Start Game", "Exit") // typeof *MainMenuScreen
+	screenManager.AddScreen(mms)
 
-	/*
-		MainMenuScreen {
-			title            string
-			currentSelection int
-			options          []string
-			*TerminalScreen {
-				s             tcell.Screen
-				width, height int
-				textStyle     tcell.Style
-			}
-		}
+	gs := NewGameScreen(ts) // typeof *GameScreen
+	screenManager.AddScreen(gs)
 
-	*/
+	screenManager.SetCurrentScreen(0)
 
-	// We create an empty currentScreen variable with type TerminalScreenInterface
-	var currentScreen TerminalScreenInterface
-	/*
-		TerminalScreenInterface {
-			DrawContent()
-			OnKeyEvent(key tcell.Key, ch rune)
-			UpdateSize(width, height int)
-		}
-	*/
-
-	// Since type TerminalScreenInterface requires 3 functions, we can set currentScreen to mms,
-	// as mms fulfills the requirement of those 3 functions. It doesn't matter where they are defined
-	// as they are declared by the interface
-	currentScreen = mms
-	// so it's worth noting that here, currentScreen IS NOT of type MainMenuScreen. It is still of type
-	// TerminalScreenInterface. Therefore it can ONLY do currentScreen.DrawContent()... and the other two funcs
-
-	// the main confusing part about the interfaces is that they are implemented implicitly
-	// so nothing really explicitly says that mms can be a TerminalScreenInterface, you just gotta know
-
-	//_ = mms.title ✅
-	//_ = currentScreen.title ❌
-
-	/*
-		type MainMenuScreen struct {
-		title            string
-		currentSelection int
-		options          []string
-		*TerminalScreen
-	}*/
-
+	text := ""
 	//Quit function
-	quit := func() {
-		s.Fini()
-		os.Exit(0)
-	}
+
 	for {
 		// Update screen
 		s.Clear()
 
 		// Draw our currentScreen
-		currentScreen.DrawContent()
+		screenManager.currentScreen.DrawContent()
+
+		drawText(s, 0, 0, len(text), 0, defStyle, text)
 
 		s.Show()
 
@@ -99,17 +62,18 @@ func main() {
 			s.Sync()
 		case *tcell.EventKey:
 			key, ch := ev.Key(), ev.Rune()
-			currentScreen.OnKeyEvent(key, ch)
+			screenManager.currentScreen.OnKeyEvent(key, ch)
+			text = fmt.Sprintf("key %d ch %d", key, ch)
 
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				quit()
-			}
-			if ch == 119 { //w
-				currentScreen = mms
-			} else if ch == 115 { //s
-				currentScreen = gs
+				Quit(s)
 			}
 		}
 	}
 
+}
+
+func Quit(s tcell.Screen) {
+	s.Fini()
+	os.Exit(0)
 }

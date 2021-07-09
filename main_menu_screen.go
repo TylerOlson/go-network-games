@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -11,15 +9,20 @@ type MainMenuScreen struct {
 	title            string
 	currentSelection int
 	options          []string
+	highlight_style  tcell.Style
+	screenManager    *ScreenManager
 	*TerminalScreen
 }
 
 // Create a new MainMenuScreen and point to it with list of options
-func NewMainMenuScreen(ts *TerminalScreen, options ...string) *MainMenuScreen {
+func NewMainMenuScreen(ts *TerminalScreen, sm *ScreenManager, options ...string) *MainMenuScreen {
 	return &MainMenuScreen{
+		title:            "Main Menu",
 		options:          options,
 		currentSelection: 0,
+		highlight_style:  tcell.StyleDefault.Background(tcell.ColorGray).Foreground(tcell.ColorWhite),
 		TerminalScreen:   ts,
+		screenManager:    sm,
 	}
 }
 
@@ -28,23 +31,29 @@ func (m *MainMenuScreen) DrawContent() {
 	drawText(m.s, (m.width/2)-(len(m.title)/2), 2, (m.width/2)+(len(m.title)/2)+1, 2, m.textStyle, m.title)
 
 	for i, option := range m.options {
-		drawText(m.s, 0, 6+i, len(option), 6+i, m.textStyle, option)
+		style := m.textStyle
+		if m.currentSelection == i {
+			style = m.highlight_style
+		}
+		drawText(m.s, 0, 6+i, len(option), 6+i, style, option)
 	}
-
-	option1 := fmt.Sprintf("MainMenu %d %d", m.width, m.height)
-	drawText(m.s, 0, 5, len(option1), 5, m.textStyle, option1)
 
 }
 
 // Our OnKeyEvent, this is where we write our menu logic
 func (m *MainMenuScreen) OnKeyEvent(key tcell.Key, ch rune) {
-	if ch == 119 { //w
+	if (key == 256 && ch == 119) || (key == 257 && ch == 0) { //w/up
 		m.currentSelection--
-	} else if ch == 115 { //s
+	} else if (key == 256 && ch == 115) || (key == 258 && ch == 0) { //s/down
 		m.currentSelection++
+	} else if key == 13 && ch == 13 { //enter
+		if m.currentSelection == len(m.options)-1 {
+			Quit(m.s)
+		}
+		m.screenManager.SetCurrentScreen(m.currentSelection + 1)
 	}
 
-	if m.currentSelection > len(m.options) {
+	if m.currentSelection >= len(m.options) {
 		m.currentSelection = 0
 	} else if m.currentSelection < 0 {
 		m.currentSelection = len(m.options) - 1

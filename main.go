@@ -28,19 +28,18 @@ func main() {
 	screenManager := NewScreenManager()
 
 	// Create a TerminalScreen for all of our other screens to look at
-	ts := NewTerminalScreen(s, w, h, defStyle)                                                       // typeof *TerminalScreen
-	mms := NewMainMenuScreen(ts, screenManager, "Start Solo Game", "Start Multiplayer Game", "Exit") // typeof *MainMenuScreen
-	gsSolo := NewGameScreen(true, ts)                                                                // typeof *GameScreen
-	gsMulti := NewGameScreen(false, ts)                                                              // typeof *GameScreen
+	ts := NewTerminalScreen(s, w, h, defStyle)                             // typeof *TerminalScreen
+	mms := NewMainMenuScreen(ts, screenManager, "Start Solo Game", "Exit") // typeof *MainMenuScreen
+	gsSolo := NewGameScreen(screenManager, ts)                             // typeof *GameScreen
+	//gsMulti := NewGameScreen(screenManager, ts)                                                      // typeof *GameScreen
 
 	screenManager.AddScreen(mms)
-	screenManager.AddScreen(gsSolo)  // Solo tictactoe
-	screenManager.AddScreen(gsMulti) // Multiplayer
+	screenManager.AddScreen(gsSolo) // Solo tictactoe
+	//screenManager.AddScreen(gsMulti) // Multiplayer
 
 	screenManager.SetCurrentScreen(0)
 
-	text := ""
-	//Quit function
+	keyPressedText := ""
 
 	for {
 		// Update screen
@@ -49,7 +48,7 @@ func main() {
 		// Draw our currentScreen
 		screenManager.currentScreen.DrawContent()
 
-		drawText(s, 0, 0, len(text), 0, defStyle, text)
+		drawText(s, 0, 0, len(keyPressedText), 0, defStyle, keyPressedText) // Draw key pressed
 
 		s.Show()
 
@@ -65,7 +64,7 @@ func main() {
 		case *tcell.EventKey:
 			key, ch := ev.Key(), ev.Rune()
 			screenManager.currentScreen.OnKeyEvent(key, ch)
-			text = fmt.Sprintf("key %d ch %d", key, ch)
+			keyPressedText = fmt.Sprintf("key %d ch %d", key, ch)
 
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				Quit(s)
@@ -75,6 +74,7 @@ func main() {
 
 }
 
+//Quit function
 func Quit(s tcell.Screen) {
 	s.Fini()
 	os.Exit(0)

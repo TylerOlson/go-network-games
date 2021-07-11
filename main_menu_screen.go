@@ -10,7 +10,7 @@ type MainMenuScreen struct {
 	currentSelection int
 	options          []string
 	highlight_style  tcell.Style
-	screenManager    *ScreenManager
+	*ScreenManager
 	*TerminalScreen
 }
 
@@ -22,7 +22,7 @@ func NewMainMenuScreen(ts *TerminalScreen, sm *ScreenManager, options ...string)
 		currentSelection: 0,
 		highlight_style:  tcell.StyleDefault.Background(tcell.ColorBlue).Foreground(tcell.ColorWhite),
 		TerminalScreen:   ts,
-		screenManager:    sm,
+		ScreenManager:    sm,
 	}
 }
 
@@ -52,7 +52,7 @@ func (m *MainMenuScreen) OnKeyEvent(key tcell.Key, ch rune) {
 		if m.currentSelection == len(m.options)-1 {
 			Quit(m.s)
 		}
-		m.screenManager.SetCurrentScreen(m.currentSelection + 1)
+		m.SetCurrentScreen(m.currentSelection + 1) // +1 because main menu is 0
 	}
 
 	if m.currentSelection >= len(m.options) {

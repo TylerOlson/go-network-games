@@ -1,42 +1,47 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 )
 
 type GameScreen struct {
 	currentGame *TicTacToeGame
-	isSolo      bool
 	infoText    string
+	*ScreenManager
 	*TerminalScreen
 }
 
 // Create our very useful GameScreen
-func NewGameScreen(isSolo bool, ts *TerminalScreen) *GameScreen {
+func NewGameScreen(screenManager *ScreenManager, ts *TerminalScreen) *GameScreen {
 	return &GameScreen{
-		isSolo:         isSolo,
 		infoText:       "Waiting for X to place",
+		ScreenManager:  screenManager,
 		TerminalScreen: ts,
 	}
 }
 
 func (gs *GameScreen) ScreenStarted() {
-	gs.currentGame = NewTicTacToeGame()
-
-	if gs.isSolo {
-		gs.currentGame.player1 = NewTicTacToePlayer(true)
-		gs.currentGame.player2 = NewTicTacToePlayer(false)
-	}
+	gs.infoText = "Waiting for X to place"
+	gs.currentGame = NewTicTacToeGame(gs)
 }
 
 // Our very useful DrawContent func
 func (gs *GameScreen) DrawContent() {
-	drawText(gs.s, (gs.width/2)-(len(gs.infoText)/2), 9, (gs.width/2)+(len(gs.infoText)/2)+1, 9, gs.textStyle, gs.infoText) // draw board value
+	if gs.currentGame.winner != ' ' {
+		gs.infoText = fmt.Sprintf("Winner %c. New game? (y/n)", gs.currentGame.winner)
+	}
+	if gs.currentGame.winner == 'n' {
+		gs.infoText = "Tie. New game? (y/n)"
+	}
+	drawText(gs.s, (gs.width/2)-(len(gs.infoText)/2), 9, (gs.width/2)+(len(gs.infoText)/2)+1, 9, gs.textStyle, gs.infoText) // Draw info text
 
-	gs.currentGame.PrintBoard(gs)
+	gs.currentGame.PrintBoard()
 }
 
 func (gs *GameScreen) OnKeyEvent(key tcell.Key, ch rune) {
+
 	if key == 256 {
 		moveNum := 0
 		switch ch {
@@ -58,9 +63,18 @@ func (gs *GameScreen) OnKeyEvent(key tcell.Key, ch rune) {
 			moveNum = 8
 		case 57: // 9
 			moveNum = 9
+		case 110: //n
+			gs.SetCurrentScreen(0) // +1 because main menu is 0
+		case 121: //y
+			if gs.currentGame.winner != ' ' {
+				gs.ScreenStarted()
+			}
 		}
 
-		gs.currentGame.DoMove(moveNum, gs)
+		if moveNum != 0 {
+			gs.currentGame.DoMove(moveNum)
+		}
+
 	}
 
 }

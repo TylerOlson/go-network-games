@@ -11,6 +11,7 @@ func NewScreenManager(screens ...TerminalScreenInterface) *ScreenManager {
 
 func (sm *ScreenManager) SetCurrentScreen(newScreen int) {
 	sm.currentScreen = sm.screens[newScreen]
+	sm.currentScreen.ScreenStarted()
 }
 
 func (sm *ScreenManager) AddScreen(newScreen TerminalScreenInterface) {

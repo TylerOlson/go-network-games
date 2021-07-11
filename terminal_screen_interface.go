@@ -6,6 +6,7 @@ import (
 
 // TerminalScreenInterface declares what functions are required by every screen we create
 type TerminalScreenInterface interface {
+	ScreenStarted()
 	DrawContent()
 	OnKeyEvent(key tcell.Key, ch rune)
 	UpdateSize(width, height int)

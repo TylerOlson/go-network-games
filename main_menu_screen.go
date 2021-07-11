@@ -20,11 +20,13 @@ func NewMainMenuScreen(ts *TerminalScreen, sm *ScreenManager, options ...string)
 		title:            "Main Menu",
 		options:          options,
 		currentSelection: 0,
-		highlight_style:  tcell.StyleDefault.Background(tcell.ColorGray).Foreground(tcell.ColorWhite),
+		highlight_style:  tcell.StyleDefault.Background(tcell.ColorBlue).Foreground(tcell.ColorWhite),
 		TerminalScreen:   ts,
 		screenManager:    sm,
 	}
 }
+
+func (m *MainMenuScreen) ScreenStarted() {}
 
 // Our own DrawContent func, prints our options defined before and our title
 func (m *MainMenuScreen) DrawContent() {

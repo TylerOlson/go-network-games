@@ -28,12 +28,14 @@ func main() {
 	screenManager := NewScreenManager()
 
 	// Create a TerminalScreen for all of our other screens to look at
-	ts := NewTerminalScreen(s, w, h, defStyle)                        // typeof *TerminalScreen
-	mms := NewMainMenuScreen(ts, screenManager, "Start Game", "Exit") // typeof *MainMenuScreen
-	screenManager.AddScreen(mms)
+	ts := NewTerminalScreen(s, w, h, defStyle)                                                       // typeof *TerminalScreen
+	mms := NewMainMenuScreen(ts, screenManager, "Start Solo Game", "Start Multiplayer Game", "Exit") // typeof *MainMenuScreen
+	gsSolo := NewGameScreen(true, ts)                                                                // typeof *GameScreen
+	gsMulti := NewGameScreen(false, ts)                                                              // typeof *GameScreen
 
-	gs := NewGameScreen(ts) // typeof *GameScreen
-	screenManager.AddScreen(gs)
+	screenManager.AddScreen(mms)
+	screenManager.AddScreen(gsSolo)  // Solo tictactoe
+	screenManager.AddScreen(gsMulti) // Multiplayer
 
 	screenManager.SetCurrentScreen(0)
 

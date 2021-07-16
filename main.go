@@ -40,8 +40,8 @@ func main() {
 
 	screenManager.SetCurrentScreen(0)
 
-	keyPressedText := ""
-	mouseText := "hello"
+	keyPressedText := "EventKey:"
+	mouseText := "EventMouse:"
 
 	for {
 		// Update screen
@@ -67,7 +67,7 @@ func main() {
 		case *tcell.EventKey:
 			key, ch := ev.Key(), ev.Rune()
 			screenManager.currentScreen.OnKeyEvent(key, ch)
-			keyPressedText = fmt.Sprintf("key %d ch %d", key, ch)
+			keyPressedText = fmt.Sprintf("EventKey: %d ch %d", key, ch)
 
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				Quit(s)
@@ -81,7 +81,7 @@ func main() {
 			x, y := ev.Position()
 
 			screenManager.currentScreen.OnMouseEvent(mod, buttons, x, y)
-			mouseText = fmt.Sprintf("EventMouse Modifiers: %d Buttons: %d Position: %d,%d", mod, buttons, x, y)
+			mouseText = fmt.Sprintf("EventMouse: %d Buttons: %d Position: %d,%d", mod, buttons, x, y)
 
 		}
 	}

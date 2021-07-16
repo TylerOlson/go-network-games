@@ -32,7 +32,7 @@ func (gs *GameScreen) DrawContent() {
 	if gs.currentGame.winner != ' ' {
 		gs.infoText = fmt.Sprintf("Winner %c. New game? (y/n)", gs.currentGame.winner)
 	}
-	if gs.currentGame.winner == 'n' {
+	if gs.currentGame.winner == 'T' {
 		gs.infoText = "Tie. New game? (y/n)"
 	}
 	drawText(gs.s, (gs.width/2)-(len(gs.infoText)/2), 9, (gs.width/2)+(len(gs.infoText)/2)+1, 9, gs.textStyle, gs.infoText) // Draw info text

@@ -18,7 +18,7 @@ func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string
 	}
 }
 
-func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
+func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style) {
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}
@@ -50,6 +50,4 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string)
 		s.SetContent(x1, y2, tcell.RuneLLCorner, nil, style)
 		s.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
 	}
-
-	drawText(s, x1+1, y1+1, x2-1, y2-1, style, text)
 }

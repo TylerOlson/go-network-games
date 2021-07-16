@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gdamore/tcell/v2"
+)
 
 type TicTacToeGame struct {
 	board          [3][3]*TicTacToeMark
@@ -15,6 +19,9 @@ type TicTacToeGame struct {
 	moveCount      int
 	winner         rune
 	isCurrentMoveX bool
+	numStyle       tcell.Style
+	xStyle         tcell.Style
+	oStyle         tcell.Style
 	gs             *GameScreen
 }
 
@@ -23,6 +30,9 @@ func NewTicTacToeGame(gs *GameScreen) *TicTacToeGame {
 		isCurrentMoveX: true,
 		gs:             gs,
 		winner:         ' ',
+		numStyle:       tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorGreen),
+		xStyle:         tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorRed),
+		oStyle:         tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorBlue),
 	}
 	game.ClearBoard()
 	return game
@@ -117,33 +127,30 @@ func (game *TicTacToeGame) DoMoveMouse(x, y int) {
 }
 
 func (game *TicTacToeGame) PrintBoard() {
-	line := ""
+	drawBox(game.gs.s, (game.gs.width/2)-11, 1, (game.gs.width/2)+11, 7, game.gs.textStyle) // Draw outline box
 
-	drawBox(game.gs.s, (game.gs.width/2)-11, 1, (game.gs.width/2)+11, 7, game.gs.textStyle, line) // Draw outline box
-
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			line += string(game.board[i][j].mark) // Add row to one line to print
-
-			if j != 2 {
-				line += "  |  " // Add seperator
-			}
-
-		}
-		drawText(game.gs.s, (game.gs.width/2)-(len(line)/2), 2+i*2, (game.gs.width/2)+(len(line)/2)+1, 2+i*2, game.gs.textStyle, line) // Draw board value
-		if i > 0 {
-			line = "---------------------"
-			drawText(game.gs.s, (game.gs.width/2)-(len(line)/2), 1+i*2, (game.gs.width/2)+(len(line)/2)+1, 1+i*2, game.gs.textStyle, line) // Draw divider
-		}
-		line = ""
-	}
+	currentStyle := game.numStyle
 
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			x := (game.gs.width / 2) - (len(line) / 2) - (6*-j + 6)
+			x := (game.gs.width / 2) - (6*-j + 6)
 			y := 2 + (2 * i)
 			game.board[i][j].x = x
 			game.board[i][j].y = y
+
+			if game.board[i][j].mark == 'X' {
+				currentStyle = game.xStyle
+			} else if game.board[i][j].mark == 'O' {
+				currentStyle = game.oStyle
+			} else {
+				currentStyle = game.numStyle
+			}
+
+			game.gs.s.SetContent(x, y, game.board[i][j].mark, nil, currentStyle)
+		}
+		if i > 0 {
+			divider := "---------------------"
+			drawText(game.gs.s, (game.gs.width/2)-(len(divider)/2), 1+i*2, (game.gs.width/2)+(21/2)+1, 1+i*2, game.gs.textStyle, divider) // Draw divider
 		}
 	}
 }
@@ -166,7 +173,7 @@ func (game *TicTacToeGame) CheckWinner(row, col int) {
 	}
 
 	if game.moveCount >= 9 {
-		game.winner = 'n'
+		game.winner = 'T'
 	}
 }
 

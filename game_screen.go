@@ -41,7 +41,6 @@ func (gs *GameScreen) DrawContent() {
 }
 
 func (gs *GameScreen) OnKeyEvent(key tcell.Key, ch rune) {
-
 	if key == 256 {
 		moveNum := 0
 		switch ch {
@@ -72,9 +71,15 @@ func (gs *GameScreen) OnKeyEvent(key tcell.Key, ch rune) {
 		}
 
 		if moveNum != 0 {
-			gs.currentGame.DoMove(moveNum)
+			gs.currentGame.DoMoveKeyboard(moveNum)
 		}
 
 	}
 
+}
+
+func (gs *GameScreen) OnMouseEvent(mod tcell.ModMask, buttons tcell.ButtonMask, x, y int) {
+	if buttons == 1 {
+		gs.currentGame.DoMoveMouse(x, y)
+	}
 }

@@ -21,6 +21,7 @@ func main() {
 	// Set text stylesÍ
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 	s.SetStyle(defStyle)
+	s.EnableMouse()
 	s.Clear()
 
 	w, h := s.Size()
@@ -40,6 +41,7 @@ func main() {
 	screenManager.SetCurrentScreen(0)
 
 	keyPressedText := ""
+	mouseText := "hello"
 
 	for {
 		// Update screen
@@ -49,6 +51,7 @@ func main() {
 		screenManager.currentScreen.DrawContent()
 
 		drawText(s, 0, 0, len(keyPressedText), 0, defStyle, keyPressedText) // Draw key pressed
+		drawText(s, 0, 1, len(mouseText), 1, defStyle, mouseText)           // Draw mouse info
 
 		s.Show()
 
@@ -69,6 +72,17 @@ func main() {
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				Quit(s)
 			}
+		case *tcell.EventMouse:
+			mod := ev.Modifiers()
+			buttons := ev.Buttons()
+			// Only process button events, not wheel events
+			buttons &= tcell.ButtonMask(0xff)
+
+			x, y := ev.Position()
+
+			screenManager.currentScreen.OnMouseEvent(mod, buttons, x, y)
+			mouseText = fmt.Sprintf("EventMouse Modifiers: %d Buttons: %d Position: %d,%d", mod, buttons, x, y)
+
 		}
 	}
 

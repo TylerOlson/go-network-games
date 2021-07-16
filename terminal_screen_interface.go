@@ -9,6 +9,7 @@ type TerminalScreenInterface interface {
 	ScreenStarted()
 	DrawContent()
 	OnKeyEvent(key tcell.Key, ch rune)
+	OnMouseEvent(mod tcell.ModMask, buttons tcell.ButtonMask, x, y int)
 	UpdateSize(width, height int)
 }
 

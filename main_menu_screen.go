@@ -61,3 +61,5 @@ func (m *MainMenuScreen) OnKeyEvent(key tcell.Key, ch rune) {
 		m.currentSelection = len(m.options) - 1
 	}
 }
+
+func (gs *MainMenuScreen) OnMouseEvent(mod tcell.ModMask, buttons tcell.ButtonMask, x, y int) {}

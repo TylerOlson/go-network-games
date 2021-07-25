@@ -9,6 +9,24 @@ import (
 )
 
 func main() {
+	args := os.Args[1:]
+
+	if len(args) > 0 {
+		if args[0] == "server" {
+			println("Starting server")
+
+			StartGameServer()
+			return
+		} else if args[0] == "client" {
+			println("Starting client")
+
+			StartClient("test")
+			StartClient("d")
+
+			return
+		}
+	}
+
 	// Initialize screen
 	s, err := tcell.NewScreen()
 	if err != nil {

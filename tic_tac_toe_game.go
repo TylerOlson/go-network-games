@@ -88,6 +88,7 @@ func (game *TicTacToeGame) DoMove(i, j int) {
 
 		moveRune = 'X'
 	}
+	StartClient(fmt.Sprintf("%d,%d %c", i, j, game.board[i][j].mark))
 	game.moveCount++
 	game.CheckWinner(i, j)
 
